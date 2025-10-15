@@ -9,6 +9,7 @@ ENV ANDROID_JACK_VM_ARGS="-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx4G"
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
+    dosfstools \
     bc \
     bison \
     build-essential \
