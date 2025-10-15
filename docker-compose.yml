@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  r36s-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: r36s-android-build
+    volumes:
+      # Cache directory for .repo to avoid re-downloading sources
+      - ./cache:/build/.repo:rw
+      # Results directory for final ZIP files
+      - ./results:/build/results:rw
+    environment:
+      # Number of parallel jobs for repo sync (default: 4, can be overridden)
+      - REPO_SYNC_JOBS=${REPO_SYNC_JOBS:-4}
+      # Build target
+      - BUILD_TARGET=${BUILD_TARGET:-lineage_r36s-userdebug}
+    # Increase shared memory size for builds
+    shm_size: '2gb'
+    # Remove container after build completes
+    # Comment this out if you want to keep the container for debugging
+    # rm: true
+    stdin_open: true
+    tty: true

@@ -1,0 +1,22 @@
+# Ignore cache and results directories
+cache/
+results/
+
+# Ignore git files
+.git
+.gitignore
+
+# Ignore documentation
+*.md
+!README.md
+
+# Ignore common editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
