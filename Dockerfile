@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y \
     repo \
     sudo \
     wget \
+    parted \
     && rm -rf /var/lib/apt/lists/*
 
 # Install specific ncurses packages from Ubuntu 22.04
