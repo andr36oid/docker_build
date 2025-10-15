@@ -58,12 +58,14 @@ RUN wget -q https://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_
     dpkg -i libncurses5_6.3-2_amd64.deb && \
     rm -f libncurses5_6.3-2_amd64.deb
 
-# Create build user (Android builds typically shouldn't run as root)
-RUN useradd -m -s /bin/bash builder && \
-    echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 # Set up git-lfs
 RUN git lfs install --system
+
+# Configure git
+RUN git config --global color.ui auto && \
+    git config --global user.email "builder@docker.local" && \
+    git config --global user.name "Docker Builder" && \
+    git lfs install
 
 # Clone the Linaro toolchain
 RUN mkdir -p /opt/toolchains && \
@@ -76,13 +78,6 @@ WORKDIR /build
 # Copy the build script
 COPY build.sh /usr/local/bin/build.sh
 RUN chmod +x /usr/local/bin/build.sh
-
-# Switch to builder user
-USER builder
-
-# Configure git for the builder user
-RUN git config --global color.ui auto && \
-    git lfs install
 
 # Set the entrypoint
 ENTRYPOINT ["/usr/local/bin/build.sh"]
