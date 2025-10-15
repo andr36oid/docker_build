@@ -2,7 +2,7 @@
 set -e
 
 # Enable debug output
-set -x
+#set -x
 
 # Color output
 RED='\033[0;31m'
