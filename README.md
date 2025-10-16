@@ -45,8 +45,11 @@ Subsequent builds are incremental and reuse:
 
 Just run:
 ```bash
-docker compose up
+docker compose up -d
+docker compose logs
 ```
+
+Remember, this will take multiple hours (or even days on slow computers).
 
 ## Configuration
 
