@@ -55,7 +55,14 @@ Remember, this will take multiple hours (or even days on slow computers).
 
 ### Environment Variables
 
-You can customize the build by setting environment variables in `docker-compose.yml` or via a `.env` file:
+You can customize the build by setting environment variables in `docker-compose.yml` or via a `.env` file.
+
+To use a `.env` file:
+```bash
+cp .env.example .env
+# Edit .env with your preferred settings
+docker compose up
+```
 
 #### REPO_SYNC_JOBS
 Number of parallel jobs for `repo sync` (default: 4)
@@ -69,11 +76,44 @@ Or via command line:
 REPO_SYNC_JOBS=8 docker compose up
 ```
 
+**Note**: Higher values may be throttled by the remote server. Keep at 4 for initial sync.
+
+#### BUILD_JOBS
+Number of parallel jobs for compilation (default: nproc, all available CPU cores)
+```yaml
+environment:
+  - BUILD_JOBS=40
+```
+
+Or via command line:
+```bash
+BUILD_JOBS=40 docker compose up
+```
+
+**Note**: Uses all available CPU cores by default. Reduce if you need CPU for other tasks during build.
+
 #### BUILD_TARGET
 Build variant target (default: lineage_r36s-userdebug)
 ```yaml
 environment:
   - BUILD_TARGET=lineage_r36s-userdebug
+```
+
+#### LOCAL_MANIFESTS_BRANCH
+Branch to use for local_manifests repository (default: main)
+```yaml
+environment:
+  - LOCAL_MANIFESTS_BRANCH=analog-stick-mouse
+```
+
+Or via command line:
+```bash
+LOCAL_MANIFESTS_BRANCH=analog-stick-mouse docker compose up
+```
+
+This allows you to use different device configurations or patches by selecting different branches from the local_manifests repository. For example, to use the analog-stick-mouse branch:
+```bash
+LOCAL_MANIFESTS_BRANCH=analog-stick-mouse docker compose up
 ```
 
 ### Changing Sync Jobs
@@ -104,7 +144,8 @@ The build requires significant disk space:
 ### Out of Memory
 If builds fail due to memory issues, you can:
 1. Increase Docker's memory limit
-2. Reduce parallel jobs: `REPO_SYNC_JOBS=2 docker compose up`
+2. Reduce parallel jobs: `BUILD_JOBS=20 docker compose up`
+3. For sync issues: `REPO_SYNC_JOBS=2 docker compose up`
 
 ### Clean Build
 To start fresh (this will re-download everything):
@@ -138,7 +179,7 @@ docker compose run --rm r36s-builder bash
 repo sync -j4
 source build/envsetup.sh
 lunch lineage_r36s-userdebug
-mka bootimage systemimage
+mka -j$(nproc) bootimage systemimage
 cd device/gameconsole/r36s
 ./mkimg.sh
 mv *.zip /build/results/

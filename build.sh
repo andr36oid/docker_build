@@ -14,21 +14,17 @@ NC='\033[0m' # No Color
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}R36S Android Build Environment${NC}"
 echo -e "${GREEN}========================================${NC}"
-echo -e "${BLUE}[DEBUG] Script started at $(date)${NC}"
 
 # Set default values
 REPO_SYNC_JOBS="${REPO_SYNC_JOBS:-4}"
+BUILD_JOBS="${BUILD_JOBS:-$(nproc)}"
 BUILD_TARGET="${BUILD_TARGET:-lineage_r36s-userdebug}"
 LOCAL_MANIFESTS_BRANCH="${LOCAL_MANIFESTS_BRANCH:-main}"
 WORKDIR="/build"
 
-echo -e "${BLUE}[DEBUG] REPO_SYNC_JOBS=${REPO_SYNC_JOBS}${NC}"
-echo -e "${BLUE}[DEBUG] BUILD_TARGET=${BUILD_TARGET}${NC}"
-echo -e "${BLUE}[DEBUG] LOCAL_MANIFESTS_BRANCH=${LOCAL_MANIFESTS_BRANCH}${NC}"
-echo -e "${BLUE}[DEBUG] WORKDIR=${WORKDIR}${NC}"
+echo -e "${BLUE}Config: repo_jobs=${REPO_SYNC_JOBS}, build_jobs=${BUILD_JOBS}, target=${BUILD_TARGET}, branch=${LOCAL_MANIFESTS_BRANCH}${NC}"
 
 cd "$WORKDIR"
-echo -e "${BLUE}[DEBUG] Changed to directory: $(pwd)${NC}"
 
 # Check if .repo directory exists and is initialized
 echo -e "${BLUE}[DEBUG] Checking for .repo/manifests directory...${NC}"
@@ -93,10 +89,8 @@ fi
 
 # Sync sources
 echo -e "${YELLOW}Syncing repository (this may take a while on first run)...${NC}"
-echo -e "${BLUE}[DEBUG] Starting repo sync at $(date)${NC}"
-echo -e "${BLUE}[DEBUG] Running: repo sync -j${REPO_SYNC_JOBS} --verbose${NC}"
-repo sync -j"${REPO_SYNC_JOBS}" --verbose
-echo -e "${BLUE}[DEBUG] Repo sync completed at $(date)${NC}"
+repo sync -j"${REPO_SYNC_JOBS}"
+echo -e "${GREEN}Repository sync completed${NC}"
 
 # Set up build environment
 echo -e "${YELLOW}Setting up build environment...${NC}"
@@ -124,7 +118,8 @@ echo -e "${BLUE}[DEBUG] Lunch completed successfully${NC}"
 echo -e "${YELLOW}Building bootimage and systemimage...${NC}"
 echo -e "${BLUE}[DEBUG] Starting build at $(date)${NC}"
 echo -e "${BLUE}[DEBUG] This will take a long time (1-3 hours)...${NC}"
-mka bootimage systemimage
+echo -e "${BLUE}[DEBUG] Using ${BUILD_JOBS} parallel jobs${NC}"
+mka -j${BUILD_JOBS} bootimage systemimage
 echo -e "${BLUE}[DEBUG] Build completed at $(date)${NC}"
 
 # Create final image

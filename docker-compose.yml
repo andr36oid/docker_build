@@ -12,6 +12,8 @@ services:
     environment:
       # Number of parallel jobs for repo sync (default: 4, can be overridden)
       - REPO_SYNC_JOBS=${REPO_SYNC_JOBS:-4}
+      # Number of parallel jobs for build (default: nproc, can be overridden)
+      - BUILD_JOBS=${BUILD_JOBS}
       # Build target
       - BUILD_TARGET=${BUILD_TARGET:-lineage_r36s-userdebug}
       # Local manifests branch (default: main)
