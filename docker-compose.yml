@@ -14,6 +14,8 @@ services:
       - REPO_SYNC_JOBS=${REPO_SYNC_JOBS:-4}
       # Build target
       - BUILD_TARGET=${BUILD_TARGET:-lineage_r36s-userdebug}
+      # Local manifests branch (default: main)
+      - LOCAL_MANIFESTS_BRANCH=${LOCAL_MANIFESTS_BRANCH:-main}
     # Increase shared memory size for builds
     shm_size: '2gb'
     # Remove container after build completes

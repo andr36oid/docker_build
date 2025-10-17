@@ -19,10 +19,12 @@ echo -e "${BLUE}[DEBUG] Script started at $(date)${NC}"
 # Set default values
 REPO_SYNC_JOBS="${REPO_SYNC_JOBS:-4}"
 BUILD_TARGET="${BUILD_TARGET:-lineage_r36s-userdebug}"
+LOCAL_MANIFESTS_BRANCH="${LOCAL_MANIFESTS_BRANCH:-main}"
 WORKDIR="/build"
 
 echo -e "${BLUE}[DEBUG] REPO_SYNC_JOBS=${REPO_SYNC_JOBS}${NC}"
 echo -e "${BLUE}[DEBUG] BUILD_TARGET=${BUILD_TARGET}${NC}"
+echo -e "${BLUE}[DEBUG] LOCAL_MANIFESTS_BRANCH=${LOCAL_MANIFESTS_BRANCH}${NC}"
 echo -e "${BLUE}[DEBUG] WORKDIR=${WORKDIR}${NC}"
 
 cd "$WORKDIR"
@@ -42,9 +44,9 @@ fi
 # Always ensure local manifests are present and valid
 echo -e "${BLUE}[DEBUG] Checking for .repo/local_manifests directory...${NC}"
 if [ ! -d ".repo/local_manifests" ]; then
-    echo -e "${YELLOW}Cloning local manifests...${NC}"
-    echo -e "${BLUE}[DEBUG] Running: git clone https://github.com/andr36oid/local_manifests .repo/local_manifests${NC}"
-    git clone https://github.com/andr36oid/local_manifests .repo/local_manifests
+    echo -e "${YELLOW}Cloning local manifests (branch: ${LOCAL_MANIFESTS_BRANCH})...${NC}"
+    echo -e "${BLUE}[DEBUG] Running: git clone -b ${LOCAL_MANIFESTS_BRANCH} https://github.com/andr36oid/local_manifests .repo/local_manifests${NC}"
+    git clone -b "${LOCAL_MANIFESTS_BRANCH}" https://github.com/andr36oid/local_manifests .repo/local_manifests
     echo -e "${BLUE}[DEBUG] Local manifests cloned${NC}"
 else
     echo -e "${GREEN}Local manifests directory exists, checking contents...${NC}"
@@ -56,11 +58,26 @@ else
         echo -e "${YELLOW}Local manifests directory is empty or invalid, re-cloning...${NC}"
         echo -e "${BLUE}[DEBUG] Removing broken local_manifests directory${NC}"
         rm -rf .repo/local_manifests
-        echo -e "${BLUE}[DEBUG] Running: git clone https://github.com/andr36oid/local_manifests .repo/local_manifests${NC}"
-        git clone https://github.com/andr36oid/local_manifests .repo/local_manifests
+        echo -e "${BLUE}[DEBUG] Running: git clone -b ${LOCAL_MANIFESTS_BRANCH} https://github.com/andr36oid/local_manifests .repo/local_manifests${NC}"
+        git clone -b "${LOCAL_MANIFESTS_BRANCH}" https://github.com/andr36oid/local_manifests .repo/local_manifests
         echo -e "${GREEN}Local manifests re-cloned successfully${NC}"
         ls -la .repo/local_manifests/
     else
+        # Check if we're on the correct branch, and switch if needed
+        cd .repo/local_manifests
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        echo -e "${BLUE}[DEBUG] Current branch: ${CURRENT_BRANCH}, Target branch: ${LOCAL_MANIFESTS_BRANCH}${NC}"
+        if [ "${CURRENT_BRANCH}" != "${LOCAL_MANIFESTS_BRANCH}" ]; then
+            echo -e "${YELLOW}Switching local manifests to branch: ${LOCAL_MANIFESTS_BRANCH}${NC}"
+            git fetch origin
+            git checkout "${LOCAL_MANIFESTS_BRANCH}"
+            git pull origin "${LOCAL_MANIFESTS_BRANCH}"
+            echo -e "${GREEN}Switched to branch ${LOCAL_MANIFESTS_BRANCH}${NC}"
+        else
+            echo -e "${GREEN}Local manifests already on correct branch, updating...${NC}"
+            git pull origin "${LOCAL_MANIFESTS_BRANCH}"
+        fi
+        cd "$WORKDIR"
         echo -e "${GREEN}Local manifests are valid${NC}"
     fi
 fi
