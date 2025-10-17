@@ -28,7 +28,8 @@ docker-build/
 
 ```bash
 cd docker-build
-docker compose up
+docker compose up -d
+docker compose logs
 ```
 
 The first build will:
