@@ -88,8 +88,45 @@ if [ -f ".repo/repo/repo" ]; then
 fi
 
 # Sync sources
+# repo sync can't check out the kernel's git submodules (fs/exfat and
+# rtl8188eus), so it exits with an error. googlesource can also throttle
+# parallel downloads. We retry the sync once, then check out the kernel below.
 echo -e "${YELLOW}Syncing repository (this may take a while on first run)...${NC}"
-repo sync -j"${REPO_SYNC_JOBS}"
+SYNC_LOG="$WORKDIR/results/repo-sync.log"
+mkdir -p "$WORKDIR/results"
+set +e
+repo sync -j"${REPO_SYNC_JOBS}" 2>&1 | tee "$SYNC_LOG"
+SYNC_RC=${PIPESTATUS[0]}
+if [ "$SYNC_RC" -ne 0 ]; then
+    echo -e "${YELLOW}repo sync reported errors, retrying with 2 jobs...${NC}"
+    repo sync -j2 2>&1 | tee "$SYNC_LOG"
+fi
+set -e
+
+# Make sure the kernel and its submodules are checked out
+KERNEL_DIR="kernel/gameconsole/r36s"
+if [ ! -f "$KERNEL_DIR/Makefile" ]; then
+    echo -e "${YELLOW}Checking out kernel manually...${NC}"
+    git -C "$KERNEL_DIR" checkout -f HEAD
+fi
+git -C "$KERNEL_DIR" submodule update --init --depth 1
+
+if [ ! -f "$KERNEL_DIR/Makefile" ]; then
+    echo -e "${RED}ERROR: Kernel checkout failed!${NC}"
+    exit 1
+fi
+
+# Any failure other than the kernel submodules is fatal
+if grep -q "^error: Unable to fully sync the tree" "$SYNC_LOG"; then
+    OTHER_FAILURES=$(awk '/^Failing repos/ {inblock=1; next}
+        inblock && /^[^ :=]+$/ {print; next}
+        {inblock=0}' "$SYNC_LOG" | grep -v "^$KERNEL_DIR/" || true)
+    if [ -n "$OTHER_FAILURES" ]; then
+        echo -e "${RED}ERROR: repo sync failed for:${NC}"
+        echo "$OTHER_FAILURES"
+        exit 1
+    fi
+fi
 echo -e "${GREEN}Repository sync completed${NC}"
 
 # Set up build environment

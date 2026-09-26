@@ -50,6 +50,8 @@ RUN apt-get update && apt-get install -y \
     sudo \
     wget \
     parted \
+    file \
+    android-sdk-libsparse-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install specific ncurses packages from Ubuntu 22.04
