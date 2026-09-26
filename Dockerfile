@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     imagemagick \
     protobuf-compiler \
     python3-protobuf \
+    python3-pil \
     lib32readline-dev \
     lib32z1-dev \
     libdw-dev \
