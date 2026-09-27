@@ -152,11 +152,11 @@ lunch "${BUILD_TARGET}"
 echo -e "${BLUE}[DEBUG] Lunch completed successfully${NC}"
 
 # Build boot and system images
-echo -e "${YELLOW}Building bootimage and systemimage...${NC}"
+echo -e "${YELLOW}Building bootimage, systemimage and vendorimage...${NC}"
 echo -e "${BLUE}[DEBUG] Starting build at $(date)${NC}"
 echo -e "${BLUE}[DEBUG] This will take a long time (1-3 hours)...${NC}"
 echo -e "${BLUE}[DEBUG] Using ${BUILD_JOBS} parallel jobs${NC}"
-mka -j${BUILD_JOBS} bootimage systemimage
+mka -j${BUILD_JOBS} bootimage systemimage vendorimage
 echo -e "${BLUE}[DEBUG] Build completed at $(date)${NC}"
 
 # Create final image

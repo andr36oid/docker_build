@@ -180,7 +180,7 @@ docker compose run --rm r36s-builder bash
 repo sync -j4
 source build/envsetup.sh
 lunch lineage_r36s-userdebug
-mka -j$(nproc) bootimage systemimage
+mka -j$(nproc) bootimage systemimage vendorimage
 cd device/gameconsole/r36s
 ./mkimg.sh
 mv *.zip /build/results/
